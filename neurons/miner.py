@@ -137,10 +137,7 @@ class Miner(BaseMinerNeuron):
             f"(missing_fields={self.manifest_compliance['missing_fields']})"
         )
         bt.logging.info(
-            f"Manifest summary | model={self.model_manifest.get('model_name', '')} "
-            f"version={self.model_manifest.get('model_version', '')} "
-            f"repo={self.model_manifest.get('repo_url', '')} "
-            f"commit={self.model_manifest.get('repo_commit', '')}"
+            f"Manifest full={json.dumps(self.model_manifest, ensure_ascii=True, sort_keys=True)}"
         )
         bt.logging.info(
             f"Manifest digest={self.manifest_digest} "
@@ -176,7 +173,12 @@ class Miner(BaseMinerNeuron):
         synapse.risk_scores = scores
         synapse.predictions = [s >= 0.5 for s in scores]
         synapse.model_manifest = dict(self.model_manifest)
-        bt.logging.info(f"[miner] Response manifest={synapse.model_manifest}")
+        bt.logging.info(
+            f"[miner] Request result | chunks={len(chunks)} "
+            f"scores={_preview(scores)} routes={_preview(routes)} "
+            f"predictions={_preview(synapse.predictions)} "
+            f"manifest={json.dumps(synapse.model_manifest, ensure_ascii=True, sort_keys=True)}"
+        )
 
         bt.logging.debug(
             f"[DEBUG] Before sending: synapse.risk_scores={synapse.risk_scores}, "
@@ -197,7 +199,7 @@ class Miner(BaseMinerNeuron):
             chunks=chunks,
         )
 
-        bt.logging.info(f"Scored {len(chunks)} chunks with runtime scorer.")
+        bt.logging.info(f"Scored {len(chunks)} chunks with scorer ml13tens5.")
         return synapse
 
     @staticmethod
@@ -308,6 +310,6 @@ if __name__ == "__main__":
         bt.logging.info("Miner running...")
         while True:
             bt.logging.info(
-                f"Miner UID: {miner.uid} | Incentive: {float(miner.metagraph.I[miner.uid])} | Scorer: runtime"
+                f"Miner UID: {miner.uid} | Incentive: {float(miner.metagraph.I[miner.uid])} | Scorer: ml13tens5"
             )
             time.sleep(60)
